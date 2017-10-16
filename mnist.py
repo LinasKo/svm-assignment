@@ -7,18 +7,21 @@ from colors import printc, BLUE, GREEN
 
 from svm import SupportVectorMachine
 
+
 def load_dataset():
     print("Loading mnist dataset...")
     with gzip.open('mnist.pkl.gz', 'rb') as f:
-        if sys.version_info > (3,0):
+        if sys.version_info > (3, 0):
             return pickle.load(f, encoding='latin-1')
         else:
             return pickle.load(f)
+
 
 def save_trained_svm(svm, filename):
     with open(filename, 'wb') as f:
         pickle.dump(svm, f)
         print("SVM model serialized to file {}".format(filename))
+
 
 def load_trained_svm(filename):
     with open(filename, 'rb') as f:
@@ -27,10 +30,11 @@ def load_trained_svm(filename):
 
 def get_X_and_y(dataset):
     X = dataset[0]
-    # Add additional row of ones for the bais
+    # Add additional row of ones for the bias
     X = np.hstack([X, np.ones((X.shape[0], 1))]).T
     y = dataset[1].T
     return X, y
+
 
 def visualize_svm_weights(svm):
     plt.clf()
@@ -48,7 +52,9 @@ def visualize_svm_weights(svm):
 
 
 def tune_hyperparameters(X_train, y_train, X_valid, y_valid):
-    pass
+    print "train X,Y shapes:", X_train.shape, y_train.shape
+    print "valid X,Y shapes:", X_valid.shape, y_valid.shape
+
 
 def run_live_classification(X_test, y_test, svm):
     print("Running live classification.\n"
@@ -80,18 +86,17 @@ if __name__ == '__main__':
     # How you do this is up to you, but you may want to fill out the  function
     # tune_hyperparmeters to automatically try lots of different values
     ###########################################################################
-    hyperparameters_tuned = False
-    rate = 0           # learning rate
-    batch_size = 10    # size of your minibatch. Don't be afraid to try larger sizes
-    reg = 0            # Regularization strength. If poorly set, may get overflow
-    num_iters = 1      # Number of iterations for stochastic gradient descent
+    hyperparameters_tuned = True
+    rate = 0.1  # learning rate
+    batch_size = 100  # size of your minibatch. Don't be afraid to try larger sizes
+    reg = 0.01  # Regularization strength. If poorly set, may get overflow
+    num_iters = 400  # Number of iterations for stochastic gradient descent
 
     if not hyperparameters_tuned:
         print("Tuning hyperparameters!")
         X_valid, y_valid = get_X_and_y(valid_set)
         tune_hyperparameters(X_train, y_train, X_valid, y_valid)
     else:
-
         #######################################################################
         # NOTE - If you already have a serialized pre-trained SVM, you can load
         # it with load_trained_svm
@@ -121,12 +126,12 @@ if __name__ == '__main__':
         # Test time!
         predicted = svm.predict(X_train)
         printc(GREEN, "Training accuracy: {}"
-                      .format(np.mean(predicted == y_train)))
+               .format(np.mean(predicted == y_train)))
 
         X_test, y_test = get_X_and_y(test_set)
         test_pred = svm.predict(X_test)
 
         printc(BLUE, "Test accuracy: {}"
-                     .format(np.mean(test_pred == y_test)))
+               .format(np.mean(test_pred == y_test)))
 
         run_live_classification(X_test, y_test, svm)
